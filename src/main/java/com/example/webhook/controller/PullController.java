@@ -52,7 +52,7 @@ public class PullController {
         //鉴权
 
 
-        
+
         //git-oschina-hook
         log.info("User-Agent:{}", userAgent);
         //zhimaxxx
