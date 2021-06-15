@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 public class PullController {
 
     @Value("${shell.startFileName:start.sh}")
-    private String startFileName;
+    private String fileName;
 
     @Value("${shell.directory}")
     private String directory;
@@ -35,6 +35,7 @@ public class PullController {
 
     @Autowired
     private ResourceLoader resourceLoader;
+
 
     /**
      * 请求
@@ -55,9 +56,9 @@ public class PullController {
         log.info("X-Gitee-Token:{}", giteeToken);
         //Push Hook
         log.info("Gitee-Event:{}", giteeEvent);*/
-
+        //鉴权先没做
         //if ("git-oschina-hook".equals(userAgent) && "PUSH HOOK".equals(giteeEvent) && token.equals(giteeToken)) {
-            executeShell();
+        executeShell();
         //}
         return "success";
     }
@@ -69,26 +70,24 @@ public class PullController {
      * @throws IOException
      */
     public void executeShell() throws IOException {
-        String fullName = getFullName(startFileName);
-        File file = new File(fullName);
-        if (!file.exists()) {
-            log.error("file {} not existed!", fullName);
-            return;
-        }
+        //有则返回无则生成文件
+        generateFile(fileName);
+
         //赋予755权限并调用
-        ProcessBuilder processBuilder = new ProcessBuilder("/bin/chmod", "755", fullName);
+        ProcessBuilder processBuilder = new ProcessBuilder("/bin/chmod", "755", getFullName(fileName));
         processBuilder.directory(new File(directory));
         Process process = processBuilder.start();
-// String input;
-// BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-// BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-// while ((input = stdInput.readLine()) != null) {
-// logger.info(input);
-// }
-// while ((input = stdError.readLine()) != null) {
-// logger.error(input);
+        //记日志
+        String input;
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        while ((input = stdInput.readLine()) != null) {
+            log.info(input);
+        }
+        while ((input = stdError.readLine()) != null) {
+            log.error(input);
+        }
 
-        // }
         int runningStatus = 0;
         try {
             runningStatus = process.waitFor();
@@ -103,13 +102,13 @@ public class PullController {
         }
     }
 
+
     private void generateFile(String fileName) throws IOException {
-        String fileFullName = getFullName(startFileName);
+        String fileFullName = getFullName(fileName);
         File file = new File(fileFullName);
         if (file.exists()) {
             return;
         }
-        // 如果文件已存在，
         // 不存在先删除再新建
         FileWriter fileWriter = new FileWriter(fileFullName);
         Resource resource = resourceLoader.getResource("classpath:" + fileName);
@@ -129,6 +128,7 @@ public class PullController {
         file.setWritable(true);
         file.setExecutable(true);
     }
+
 
     /**
      * 文件调用全路径
