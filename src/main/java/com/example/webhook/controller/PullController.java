@@ -49,25 +49,17 @@ public class PullController {
     public String auto(@RequestHeader("User-Agent") String userAgent,
                        @RequestHeader("X-Gitee-Token") String giteeToken,
                        @RequestHeader("X-Gitee-Event") String giteeEvent) throws IOException {
-        //鉴权
-
-
-
-        //git-oschina-hook
+/*        //git-oschina-hook
         log.info("User-Agent:{}", userAgent);
         //zhimaxxx
         log.info("X-Gitee-Token:{}", giteeToken);
         //Push Hook
-        log.info("Gitee-Event:{}", giteeEvent);
+        log.info("Gitee-Event:{}", giteeEvent);*/
 
-        if ("git-oschina-hook".equals(userAgent)
-                && "PUSH HOOK".equals(giteeEvent)
-                && token.equals(giteeToken)) {
-            //才去调用shell脚本
+        //if ("git-oschina-hook".equals(userAgent) && "PUSH HOOK".equals(giteeEvent) && token.equals(giteeToken)) {
             executeShell();
-            return "ok";
-        }
-        return "非法调用";
+        //}
+        return "success";
     }
 
 
